@@ -355,6 +355,24 @@ Resources:
         # This file (buildspec.yml In Source code) contains commands to Create and Push a docker image to the ECR_REPOSITORY_URI
         BuildSpec: buildspec.yml
 
+  # Create a TaskDefinition with container details
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties: 
+      Memory: 1024
+      Cpu: 512
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - 'FARGATE'
+      TaskRoleArn: !Ref ExecutionRole
+      ExecutionRoleArn: !Ref ExecutionRole
+      ContainerDefinitions:
+        - Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
+          Image: !Ref ImageURI
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              HostPort: !Ref ContainerPort
+
   # Create CodePipeline with 3 stages (Source, Build and Deploy)
   CodePipeLine:
     Type: AWS::CodePipeline::Pipeline
@@ -405,30 +423,30 @@ Resources:
                 ProjectName: !Ref BuildProject
             RunOrder: 1
 
-        # Deploy the project by executing Fargate-Cluster.yml file in the Source code with Cloudformation.
-        - Name: Deploy
-          Actions:
-          - Name: Deploy
-            ActionTypeId:
-              Category: Deploy
-              Owner: AWS
-              Version: 1
-              Provider: CloudFormation
-            InputArtifacts:
-              - Name: source-output-artifacts
-              - Name: build-output-artifacts
-            Configuration:
-                ActionMode: CREATE_UPDATE
-                Capabilities: CAPABILITY_NAMED_IAM
-                # Pass parameter values to Fargate-Cluster.yml for deployment
-                ParameterOverrides: !Sub |
-                  {
-                    "ImageURI" : { "Fn::GetParam" : ["build-output-artifacts", "imageDetail.json", "ImageURI"] },
-                    "Stage":  "${Stage}",
-                    "ContainerPort": "${ContainerPort}"
-                  }
-                RoleArn: 
-                  Fn::GetAtt: [ CloudformationExecutionRole, Arn ]
-                StackName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'FargateECSCluster']]
-                TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster2.yml
-            RunOrder: 1
+        # # Deploy the project by executing Fargate-Cluster.yml file in the Source code with Cloudformation.
+        # - Name: Deploy
+        #   Actions:
+        #   - Name: Deploy
+        #     ActionTypeId:
+        #       Category: Deploy
+        #       Owner: AWS
+        #       Version: 1
+        #       Provider: CloudFormation
+        #     InputArtifacts:
+        #       - Name: source-output-artifacts
+        #       - Name: build-output-artifacts
+        #     Configuration:
+        #         ActionMode: CREATE_UPDATE
+        #         Capabilities: CAPABILITY_NAMED_IAM
+        #         # Pass parameter values to Fargate-Cluster.yml for deployment
+        #         ParameterOverrides: !Sub |
+        #           {
+        #             "ImageURI" : { "Fn::GetParam" : ["build-output-artifacts", "imageDetail.json", "ImageURI"] },
+        #             "Stage":  "${Stage}",
+        #             "ContainerPort": "${ContainerPort}"
+        #           }
+        #         RoleArn: 
+        #           Fn::GetAtt: [ CloudformationExecutionRole, Arn ]
+        #         StackName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'FargateECSCluster']]
+        #         TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster2.yml
+        #     RunOrder: 1

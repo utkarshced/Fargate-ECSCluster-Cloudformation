@@ -156,6 +156,90 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref SubnetB
 
+  # Creat a security group for load balancer and open port 80 in bound from internet
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'LoadBalancerSecurityGroup']]
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 8090
+          ToPort: 8090
+          CidrIp: 0.0.0.0/0
+
+  # Creat a security group for Containers and open in bound Container port from Load balancer security group to the Container 
+  ContainerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'ContainerSecurityGroup']]
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref ContainerPort
+          ToPort: !Ref ContainerPort
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+
+  # Create a LoadBalancer and attach the Security group and Subnets
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties: 
+      IpAddressType: ipv4
+      Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'LoadBalancer']]
+      Scheme: internet-facing
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
+      Subnets: 
+        - !Ref SubnetA
+        - !Ref SubnetB
+      Type: application
+
+  # Create a TargetGroup for Production HTTP port 80
+  TargetGroup1:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TargetGroup1']]
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VPC
+
+  # Create a LoadBalancerListener and attach the Production TargetGroup and LoadBalancer
+  LoadBalancerListener1:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions: 
+        - TargetGroupArn: !Ref TargetGroup1
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  # Create a TargetGroup for Test HTTP port 80
+  TargetGroup2:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TargetGroup2']]
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId: !Ref VPC
+
+  # Create a LoadBalancerListener and attach the Production TargetGroup and LoadBalancer
+  LoadBalancerListener2:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions: 
+        - TargetGroupArn: !Ref TargetGroup2
+          Type: forward
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 8090
+      Protocol: HTTP
+
   # Create an ECR Repository to store docker images
   ECRRepository:
     Type: AWS::ECR::Repository
@@ -321,30 +405,30 @@ Resources:
                 ProjectName: !Ref BuildProject
             RunOrder: 1
 
-        # Deploy the project by executing Fargate-Cluster.yml file in the Source code with Cloudformation.
-        - Name: Deploy
-          Actions:
-          - Name: Deploy
-            ActionTypeId:
-              Category: Deploy
-              Owner: AWS
-              Version: 1
-              Provider: CloudFormation
-            InputArtifacts:
-              - Name: source-output-artifacts
-              - Name: build-output-artifacts
-            Configuration:
-                ActionMode: CREATE_UPDATE
-                Capabilities: CAPABILITY_NAMED_IAM
-                # Pass parameter values to Fargate-Cluster.yml for deployment
-                ParameterOverrides: !Sub |
-                  {
-                    "ImageURI" : { "Fn::GetParam" : ["build-output-artifacts", "imageDetail.json", "ImageURI"] },
-                    "Stage":  "${Stage}",
-                    "ContainerPort": "${ContainerPort}"
-                  }
-                RoleArn: 
-                  Fn::GetAtt: [ CloudformationExecutionRole, Arn ]
-                StackName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'FargateECSCluster']]
-                TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster2.yml
-            RunOrder: 1
+        # # Deploy the project by executing Fargate-Cluster.yml file in the Source code with Cloudformation.
+        # - Name: Deploy
+        #   Actions:
+        #   - Name: Deploy
+        #     ActionTypeId:
+        #       Category: Deploy
+        #       Owner: AWS
+        #       Version: 1
+        #       Provider: CloudFormation
+        #     InputArtifacts:
+        #       - Name: source-output-artifacts
+        #       - Name: build-output-artifacts
+        #     Configuration:
+        #         ActionMode: CREATE_UPDATE
+        #         Capabilities: CAPABILITY_NAMED_IAM
+        #         # Pass parameter values to Fargate-Cluster.yml for deployment
+        #         ParameterOverrides: !Sub |
+        #           {
+        #             "ImageURI" : { "Fn::GetParam" : ["build-output-artifacts", "imageDetail.json", "ImageURI"] },
+        #             "Stage":  "${Stage}",
+        #             "ContainerPort": "${ContainerPort}"
+        #           }
+        #         RoleArn: 
+        #           Fn::GetAtt: [ CloudformationExecutionRole, Arn ]
+        #         StackName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'FargateECSCluster']]
+        #         TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster2.yml
+        #     RunOrder: 1

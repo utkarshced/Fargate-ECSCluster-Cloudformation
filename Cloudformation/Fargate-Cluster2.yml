@@ -362,78 +362,78 @@ Resources:
   #     ManagedPolicyArns:
   #       - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
 
-  BlueTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Properties: 
-      Memory: 1024
-      Cpu: 512
-      NetworkMode: awsvpc
-      RequiresCompatibilities:
-        - 'FARGATE'
-      TaskRoleArn: !Ref ExecutionRole
-      ExecutionRoleArn: !Ref ExecutionRole
-      ContainerDefinitions:
-        - Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
-          Image: !Ref ImageURI
-          PortMappings:
-            - ContainerPort: !Ref ContainerPort
-              HostPort: !Ref ContainerPort
   # BlueTaskDefinition:
-  #   Type: 'AWS::ECS::TaskDefinition'
-  #   Properties:
-  #     ExecutionRoleArn: !GetAtt 
-  #       - ECSTaskExecutionRole
-  #       - Arn
+  #   Type: AWS::ECS::TaskDefinition
+  #   Properties: 
+  #     Memory: 1024
+  #     Cpu: 512
+  #     NetworkMode: awsvpc
+  #     RequiresCompatibilities:
+  #       - 'FARGATE'
+  #     TaskRoleArn: !Ref ExecutionRole
+  #     ExecutionRoleArn: !Ref ExecutionRole
   #     ContainerDefinitions:
   #       - Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
   #         Image: !Ref ImageURI
   #         PortMappings:
   #           - ContainerPort: !Ref ContainerPort
   #             HostPort: !Ref ContainerPort
-  #     RequiresCompatibilities:
-  #       - FARGATE
-  #     NetworkMode: awsvpc
-  #     Cpu: '256'
-  #     Memory: '512'
-  #     Family: ecs-demo
-  ECSDemoCluster:
-    Type: 'AWS::ECS::Cluster'
-    Properties: {}
-  ECSDemoService:
-    Type: 'AWS::ECS::Service'
-    Properties:
-      Cluster: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Cluster']]
-      DesiredCount: 1
-      DeploymentController:
-        Type: EXTERNAL
-  BlueTaskSet:
-    Type: 'AWS::ECS::TaskSet'
-    Properties:
-      Cluster: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Cluster']]
-      LaunchType: FARGATE
-      NetworkConfiguration:
-        AwsVpcConfiguration:
-          AssignPublicIp: ENABLED
-          SecurityGroups:
-            - !Ref ExampleSecurityGroup
-          Subnets:
-            - !Ref SubnetA
-            - !Ref SubnetB
-      PlatformVersion: 1.4.0
-      Scale:
-        Unit: PERCENT
-        Value: 100
-      Service: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Service']]
-      TaskDefinition: !Ref BlueTaskDefinition
-      LoadBalancers:
-        - ContainerName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
-          ContainerPort: 80
-          TargetGroupArn: !Ref ALBTargetGroupBlue
-  PrimaryTaskSet:
-    Type: 'AWS::ECS::PrimaryTaskSet'
-    Properties:
-      Cluster: !Ref ECSDemoCluster
-      Service: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Service']]
-      TaskSetId: !GetAtt 
-        - BlueTaskSet
-        - Id
+  # # BlueTaskDefinition:
+  # #   Type: 'AWS::ECS::TaskDefinition'
+  # #   Properties:
+  # #     ExecutionRoleArn: !GetAtt 
+  # #       - ECSTaskExecutionRole
+  # #       - Arn
+  # #     ContainerDefinitions:
+  # #       - Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
+  # #         Image: !Ref ImageURI
+  # #         PortMappings:
+  # #           - ContainerPort: !Ref ContainerPort
+  # #             HostPort: !Ref ContainerPort
+  # #     RequiresCompatibilities:
+  # #       - FARGATE
+  # #     NetworkMode: awsvpc
+  # #     Cpu: '256'
+  # #     Memory: '512'
+  # #     Family: ecs-demo
+  # ECSDemoCluster:
+  #   Type: 'AWS::ECS::Cluster'
+  #   Properties: {}
+  # ECSDemoService:
+  #   Type: 'AWS::ECS::Service'
+  #   Properties:
+  #     Cluster: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Cluster']]
+  #     DesiredCount: 1
+  #     DeploymentController:
+  #       Type: EXTERNAL
+  # BlueTaskSet:
+  #   Type: 'AWS::ECS::TaskSet'
+  #   Properties:
+  #     Cluster: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Cluster']]
+  #     LaunchType: FARGATE
+  #     NetworkConfiguration:
+  #       AwsVpcConfiguration:
+  #         AssignPublicIp: ENABLED
+  #         SecurityGroups:
+  #           - !Ref ExampleSecurityGroup
+  #         Subnets:
+  #           - !Ref SubnetA
+  #           - !Ref SubnetB
+  #     PlatformVersion: 1.4.0
+  #     Scale:
+  #       Unit: PERCENT
+  #       Value: 100
+  #     Service: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Service']]
+  #     TaskDefinition: !Ref BlueTaskDefinition
+  #     LoadBalancers:
+  #       - ContainerName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
+  #         ContainerPort: 80
+  #         TargetGroupArn: !Ref ALBTargetGroupBlue
+  # PrimaryTaskSet:
+  #   Type: 'AWS::ECS::PrimaryTaskSet'
+  #   Properties:
+  #     Cluster: !Ref ECSDemoCluster
+  #     Service: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Service']]
+  #     TaskSetId: !GetAtt 
+  #       - BlueTaskSet
+  #       - Id

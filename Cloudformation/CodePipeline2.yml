@@ -430,5 +430,5 @@ Resources:
                 RoleArn: 
                   Fn::GetAtt: [ CloudformationExecutionRole, Arn ]
                 StackName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'FargateECSCluster']]
-                TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster2.yml
+                TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster.yml
             RunOrder: 1

@@ -6,20 +6,20 @@ Parameters:
     Description: CIDR Block for VPC
     Type: String
     Default: 10.1.0.0/16
-    AllowedValues:
-      - 10.1.0.0/16
+    # AllowedValues:
+    #   - 10.1.0.0/16
   PublicSubnet1Param:
     Description: Public Subnet 1
     Type: String
     Default: 10.1.11.0/24
-    AllowedValues:
-      - 10.1.11.0/24
+    # AllowedValues:
+    #   - 10.1.11.0/24
   PublicSubnet2Param:
     Description: Public Subnet 2
     Type: String
     Default: 10.1.12.0/24
-    AllowedValues:
-      - 10.1.12.0/24
+    # AllowedValues:
+    #   - 10.1.12.0/24
   ProjectTitle:
     Type: String
     Default: <ProjectTitle>
@@ -354,24 +354,6 @@ Resources:
         Type: CODEPIPELINE
         # This file (buildspec.yml In Source code) contains commands to Create and Push a docker image to the ECR_REPOSITORY_URI
         BuildSpec: buildspec.yml
-
-  # Create a TaskDefinition with container details
-  TaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Properties: 
-      Memory: 1024
-      Cpu: 512
-      NetworkMode: awsvpc
-      RequiresCompatibilities:
-        - 'FARGATE'
-      TaskRoleArn: !Ref ExecutionRole
-      ExecutionRoleArn: !Ref ExecutionRole
-      ContainerDefinitions:
-        - Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
-          Image: !Ref ImageURI
-          PortMappings:
-            - ContainerPort: !Ref ContainerPort
-              HostPort: !Ref ContainerPort
 
   # Create CodePipeline with 3 stages (Source, Build and Deploy)
   CodePipeLine:

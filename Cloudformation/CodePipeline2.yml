@@ -50,195 +50,195 @@ Resources:
     Properties:
       ClusterName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Cluster']]
 
-  # Create Private DNSNamespace
-  MyPrivateDnsNamespace:
-    Type: "AWS::ServiceDiscovery::PrivateDnsNamespace"
-    Properties:
-      Vpc: !Ref VPC
-      Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Dns']]
+  # # Create Private DNSNamespace
+  # MyPrivateDnsNamespace:
+  #   Type: "AWS::ServiceDiscovery::PrivateDnsNamespace"
+  #   Properties:
+  #     Vpc: !Ref VPC
+  #     Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Dns']]
 
-  # Create a VPC
-  VPC:
-    Type: AWS::EC2::VPC
-    Properties: 
-      CidrBlock: !Ref VPCCIDR
-      EnableDnsHostnames: True
-      EnableDnsSupport: True
-      Tags:
-        - Key: Name
-          Value: !Ref ProjectTitle
+  # # Create a VPC
+  # VPC:
+  #   Type: AWS::EC2::VPC
+  #   Properties: 
+  #     CidrBlock: !Ref VPCCIDR
+  #     EnableDnsHostnames: True
+  #     EnableDnsSupport: True
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Ref ProjectTitle
 
-  # Create an Internet Gateway
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    DependsOn: VPC
+  # # Create an Internet Gateway
+  # InternetGateway:
+  #   Type: AWS::EC2::InternetGateway
+  #   DependsOn: VPC
 
-  # Attach the internet gateway to the VPC
-  VPCInternetGatewayAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    DependsOn:
-      - VPC
-      - InternetGateway
-    Properties: 
-      VpcId: !Ref VPC
-      InternetGatewayId: !Ref InternetGateway
+  # # Attach the internet gateway to the VPC
+  # VPCInternetGatewayAttachment:
+  #   Type: AWS::EC2::VPCGatewayAttachment
+  #   DependsOn:
+  #     - VPC
+  #     - InternetGateway
+  #   Properties: 
+  #     VpcId: !Ref VPC
+  #     InternetGatewayId: !Ref InternetGateway
 
-    # Create a Subnet
-  SubnetA:
-    Type: AWS::EC2::Subnet
-    DependsOn: VPCInternetGatewayAttachment
-    Properties:
-      CidrBlock: !Ref PublicSubnet1Param
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select
-        - '0'
-        - !GetAZs ''
-      Tags:
-        - Key: Name
-          Value: !Ref ProjectTitle
+  #   # Create a Subnet
+  # SubnetA:
+  #   Type: AWS::EC2::Subnet
+  #   DependsOn: VPCInternetGatewayAttachment
+  #   Properties:
+  #     CidrBlock: !Ref PublicSubnet1Param
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Select
+  #       - '0'
+  #       - !GetAZs ''
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Ref ProjectTitle
 
-  # Create a Subnet
-  SubnetB:
-    Type: AWS::EC2::Subnet
-    DependsOn: VPCInternetGatewayAttachment
-    Properties:
-      CidrBlock: !Ref PublicSubnet2Param
-      VpcId: !Ref VPC
-      AvailabilityZone: !Select
-        - '1'
-        - !GetAZs ''
-      Tags:
-        - Key: Name
-          Value: !Ref ProjectTitle
+  # # Create a Subnet
+  # SubnetB:
+  #   Type: AWS::EC2::Subnet
+  #   DependsOn: VPCInternetGatewayAttachment
+  #   Properties:
+  #     CidrBlock: !Ref PublicSubnet2Param
+  #     VpcId: !Ref VPC
+  #     AvailabilityZone: !Select
+  #       - '1'
+  #       - !GetAZs ''
+  #     Tags:
+  #       - Key: Name
+  #         Value: !Ref ProjectTitle
 
-  # Create a route table to allow access to internet
-  PublicRouteTable:
-    Type: AWS::EC2::RouteTable
-    DependsOn:
-      - VPC
-      - VPCInternetGatewayAttachment
-    Properties:
-      VpcId: !Ref VPC
-      Tags:
-        - Key: Name
-          Value: Public
+  # # Create a route table to allow access to internet
+  # PublicRouteTable:
+  #   Type: AWS::EC2::RouteTable
+  #   DependsOn:
+  #     - VPC
+  #     - VPCInternetGatewayAttachment
+  #   Properties:
+  #     VpcId: !Ref VPC
+  #     Tags:
+  #       - Key: Name
+  #         Value: Public
 
-  # Create a Route to allow access to internet using an internet gateway
-  PublicRoute:
-    Type: AWS::EC2::Route
-    DependsOn:
-      - PublicRouteTable
-      - VPCInternetGatewayAttachment
-    Properties:
-      RouteTableId: !Ref PublicRouteTable
-      DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref InternetGateway
+  # # Create a Route to allow access to internet using an internet gateway
+  # PublicRoute:
+  #   Type: AWS::EC2::Route
+  #   DependsOn:
+  #     - PublicRouteTable
+  #     - VPCInternetGatewayAttachment
+  #   Properties:
+  #     RouteTableId: !Ref PublicRouteTable
+  #     DestinationCidrBlock: 0.0.0.0/0
+  #     GatewayId: !Ref InternetGateway
 
-  # Attach Public Route to SubnetA
-  SubnetAPublicRouteAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    DependsOn:
-      - PublicRouteTable
-      - SubnetA
-      - VPCInternetGatewayAttachment
-    Properties: 
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref SubnetA
+  # # Attach Public Route to SubnetA
+  # SubnetAPublicRouteAssociation:
+  #   Type: AWS::EC2::SubnetRouteTableAssociation
+  #   DependsOn:
+  #     - PublicRouteTable
+  #     - SubnetA
+  #     - VPCInternetGatewayAttachment
+  #   Properties: 
+  #     RouteTableId: !Ref PublicRouteTable
+  #     SubnetId: !Ref SubnetA
 
-  # Attach Public Route to SubnetB
-  SubnetBPublicRouteAssociation:
-    Type: AWS::EC2::SubnetRouteTableAssociation
-    DependsOn:
-      - PublicRouteTable
-      - SubnetB
-      - VPCInternetGatewayAttachment
-    Properties: 
-      RouteTableId: !Ref PublicRouteTable
-      SubnetId: !Ref SubnetB
+  # # Attach Public Route to SubnetB
+  # SubnetBPublicRouteAssociation:
+  #   Type: AWS::EC2::SubnetRouteTableAssociation
+  #   DependsOn:
+  #     - PublicRouteTable
+  #     - SubnetB
+  #     - VPCInternetGatewayAttachment
+  #   Properties: 
+  #     RouteTableId: !Ref PublicRouteTable
+  #     SubnetId: !Ref SubnetB
 
-  # Creat a security group for load balancer and open port 80 in bound from internet
-  LoadBalancerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'LoadBalancerSecurityGroup']]
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-        - IpProtocol: tcp
-          FromPort: 8090
-          ToPort: 8090
-          CidrIp: 0.0.0.0/0
+  # # Creat a security group for load balancer and open port 80 in bound from internet
+  # LoadBalancerSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupDescription: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'LoadBalancerSecurityGroup']]
+  #     VpcId: !Ref VPC
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: 80
+  #         ToPort: 80
+  #         CidrIp: 0.0.0.0/0
+  #       - IpProtocol: tcp
+  #         FromPort: 8090
+  #         ToPort: 8090
+  #         CidrIp: 0.0.0.0/0
 
-  # Creat a security group for Containers and open in bound Container port from Load balancer security group to the Container 
-  ContainerSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'ContainerSecurityGroup']]
-      VpcId: !Ref VPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: !Ref ContainerPort
-          ToPort: !Ref ContainerPort
-          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+  # # Creat a security group for Containers and open in bound Container port from Load balancer security group to the Container 
+  # ContainerSecurityGroup:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupDescription: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'ContainerSecurityGroup']]
+  #     VpcId: !Ref VPC
+  #     SecurityGroupIngress:
+  #       - IpProtocol: tcp
+  #         FromPort: !Ref ContainerPort
+  #         ToPort: !Ref ContainerPort
+  #         SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
 
-  # Create a LoadBalancer and attach the Security group and Subnets
-  LoadBalancer:
-    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
-    Properties: 
-      IpAddressType: ipv4
-      Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'LoadBalancer']]
-      Scheme: internet-facing
-      SecurityGroups:
-        - !Ref LoadBalancerSecurityGroup
-      Subnets: 
-        - !Ref SubnetA
-        - !Ref SubnetB
-      Type: application
+  # # Create a LoadBalancer and attach the Security group and Subnets
+  # LoadBalancer:
+  #   Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+  #   Properties: 
+  #     IpAddressType: ipv4
+  #     Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'LoadBalancer']]
+  #     Scheme: internet-facing
+  #     SecurityGroups:
+  #       - !Ref LoadBalancerSecurityGroup
+  #     Subnets: 
+  #       - !Ref SubnetA
+  #       - !Ref SubnetB
+  #     Type: application
 
-  # Create a TargetGroup for Production HTTP port 80
-  TargetGroup1:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TargetGroup1']]
-      Port: 80
-      Protocol: HTTP
-      TargetType: ip
-      VpcId: !Ref VPC
+  # # Create a TargetGroup for Production HTTP port 80
+  # TargetGroup1:
+  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #   Properties:
+  #     Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TargetGroup1']]
+  #     Port: 80
+  #     Protocol: HTTP
+  #     TargetType: ip
+  #     VpcId: !Ref VPC
 
-  # Create a LoadBalancerListener and attach the Production TargetGroup and LoadBalancer
-  LoadBalancerListener1:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions: 
-        - TargetGroupArn: !Ref TargetGroup1
-          Type: forward
-      LoadBalancerArn: !Ref LoadBalancer
-      Port: 80
-      Protocol: HTTP
+  # # Create a LoadBalancerListener and attach the Production TargetGroup and LoadBalancer
+  # LoadBalancerListener1:
+  #   Type: AWS::ElasticLoadBalancingV2::Listener
+  #   Properties:
+  #     DefaultActions: 
+  #       - TargetGroupArn: !Ref TargetGroup1
+  #         Type: forward
+  #     LoadBalancerArn: !Ref LoadBalancer
+  #     Port: 80
+  #     Protocol: HTTP
 
-  # Create a TargetGroup for Test HTTP port 80
-  TargetGroup2:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TargetGroup2']]
-      Port: 80
-      Protocol: HTTP
-      TargetType: ip
-      VpcId: !Ref VPC
+  # # Create a TargetGroup for Test HTTP port 80
+  # TargetGroup2:
+  #   Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #   Properties:
+  #     Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TargetGroup2']]
+  #     Port: 80
+  #     Protocol: HTTP
+  #     TargetType: ip
+  #     VpcId: !Ref VPC
 
-  # Create a LoadBalancerListener and attach the Production TargetGroup and LoadBalancer
-  LoadBalancerListener2:
-    Type: AWS::ElasticLoadBalancingV2::Listener
-    Properties:
-      DefaultActions: 
-        - TargetGroupArn: !Ref TargetGroup2
-          Type: forward
-      LoadBalancerArn: !Ref LoadBalancer
-      Port: 8090
-      Protocol: HTTP
+  # # Create a LoadBalancerListener and attach the Production TargetGroup and LoadBalancer
+  # LoadBalancerListener2:
+  #   Type: AWS::ElasticLoadBalancingV2::Listener
+  #   Properties:
+  #     DefaultActions: 
+  #       - TargetGroupArn: !Ref TargetGroup2
+  #         Type: forward
+  #     LoadBalancerArn: !Ref LoadBalancer
+  #     Port: 8090
+  #     Protocol: HTTP
 
   # Create an ECR Repository to store docker images
   ECRRepository:
@@ -430,5 +430,5 @@ Resources:
                 RoleArn: 
                   Fn::GetAtt: [ CloudformationExecutionRole, Arn ]
                 StackName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'FargateECSCluster']]
-                TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster.yml
+                TemplatePath: source-output-artifacts::Cloudformation/Fargate-Cluster2.yml
             RunOrder: 1

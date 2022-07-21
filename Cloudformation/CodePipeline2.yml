@@ -291,19 +291,19 @@ Resources:
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/AdministratorAccess'
 
-  # Create Access Role for ECS-Tasks
-  ExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TaskExecutionRole']]
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+  # # Create Access Role for ECS-Tasks
+  # TaskExecutionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'TaskExecutionRole']]
+  #     AssumeRolePolicyDocument:
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: ecs-tasks.amazonaws.com
+  #           Action: 'sts:AssumeRole'
+  #     ManagedPolicyArns:
+  #       - 'arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
 
   # Create Service Role for ECS
   ecsServiceRole:

@@ -212,14 +212,14 @@ Resources:
     Properties:
       DefaultActions: 
       - Type: forward
-          ForwardConfig:
-            TargetGroups:
-              - TargetGroupArn: !Ref TargetGroup1
-                Weight: 1
+        ForwardConfig:
+          TargetGroups:
+            - TargetGroupArn: !Ref TargetGroup1
+              Weight: 1
       LoadBalancerArn: !Ref LoadBalancer
       Port: 80
-      Protocol: HTTP
-      
+      Protocol: HTTP  
+
   ALBListenerProdRule:
     Type: 'AWS::ElasticLoadBalancingV2::ListenerRule'
     Properties:
@@ -324,6 +324,15 @@ Resources:
         - ContainerName: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'Container']]
           ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref TargetGroup1
+
+  PrimaryTaskSet:
+    Type: 'AWS::ECS::PrimaryTaskSet'
+    Properties:
+      Cluster: !Ref Cluster
+      Service: !Ref ECSService
+      TaskSetId: !GetAtt 
+        - BlueTaskSet
+        - Id
 
   # # Create an ECS Service and add created Cluster, TaskDefintion, Subnets, TargetGroup and SecurityGroup
   # ECSService:

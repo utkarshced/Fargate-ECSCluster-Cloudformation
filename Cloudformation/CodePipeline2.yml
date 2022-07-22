@@ -358,7 +358,7 @@ Resources:
   # Create CodePipeline with 3 stages (Source, Build and Deploy)
   CodePipeLine:
     Type: AWS::CodePipeline::Pipeline
-    DependsOn: S3Bucket
+    #DependsOn: S3Bucket
     Properties: 
       ArtifactStore: 
         Location: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 's3bucket']]

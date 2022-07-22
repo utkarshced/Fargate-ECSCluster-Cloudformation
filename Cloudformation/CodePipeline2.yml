@@ -362,7 +362,7 @@ Resources:
     Properties: 
       ArtifactStore: 
         Location: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 's3bucket']]
-        Type: S3
+        Type: String
       Name: !Join ['-', [!Ref Stage, !Ref ProjectTitle, 'CodePipeLine']]
       RestartExecutionOnUpdate: False
       RoleArn: 
